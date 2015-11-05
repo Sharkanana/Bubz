@@ -121,23 +121,25 @@ window.onload = function() {
 
         var bub = game.add.sprite(x, y, 'bubble');
         game.physics.p2.enable(bub);
-        bub.scale.x*=.1;
-        bub.scale.y*=.1;
-
-        bub.body.setCollisionGroup(groups.bubbleCollisionGroup);
 
         status.currentBubble = bub;
     }
 
     function popBubble(pointer, evt) {
-        if(status.currentBubble) {
+        var bub = status.currentBubble;
+        if(bub) {
 
-            status.currentBubble.body.collides(groups.unitsCollisionGroup, function(bubble, unit) {
-                if(unit.sprite)
-                    unit.sprite.destroy();
+            var unitsToDestroy = [];
+            groups.units.forEach(function(unit) {
+                if(Phaser.Math.distance(unit.x, unit.y, bub.x, bub.y) <= bub.width / 2) {
+                    unitsToDestroy.push(unit);
+                }
             });
 
-            delete status.currentBubble;
+            for(var i = 0; i < unitsToDestroy.length; i++)
+                unitsToDestroy[i].destroy();
+
+            bub.destroy();
         }
     }
 };

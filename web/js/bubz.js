@@ -4,7 +4,7 @@
  */
 window.onload = function() {
 
-    var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update, render: render });
+    var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
     var texts = {},
         buttons = {},
@@ -19,13 +19,18 @@ window.onload = function() {
 
     function preload () {
         game.load.image('logo', 'img/bubz-logo.png');
+        game.load.image('bubble', 'img/bubble.png');
         game.load.spritesheet('btn', 'img/button.png', 80, 20);
         game.load.spritesheet('unit', 'img/unit.png', 27, 29);
     }
 
     function create () {
 
-        game.physics.startSystem(Phaser.Physics.ARCADE);
+        //setup physics
+        game.physics.startSystem(Phaser.Physics.P2JS);
+        game.physics.p2.restitution = 1;
+        game.physics.p2.damping = 0;
+        game.physics.p2.setImpactEvents(true);
 
         game.stage.backgroundColor = '#72ADFF';
 
@@ -44,8 +49,19 @@ window.onload = function() {
         //init units
         var units = game.add.group();
         units.enableBody = true;
-        units.physicsBodyType = Phaser.Physics.ARCADE;
+        units.physicsBodyType = Phaser.Physics.P2JS;
         groups.units = units;
+
+        //setup collision groups
+        groups.unitsCollisionGroup = game.physics.p2.createCollisionGroup();
+        groups.bubbleCollisionGroup = game.physics.p2.createCollisionGroup();
+
+        //reset bounds collision group
+        game.physics.p2.updateBoundsCollisionGroup();
+
+        //input
+        game.input.onDown.add(createBubble, this);
+        game.input.onUp.add(popBubble, this);
     }
 
     function update() {
@@ -61,13 +77,13 @@ window.onload = function() {
                 status.init = false;
             }
             else {
-
+                if(status.currentBubble) {
+                    var bub = status.currentBubble;
+                    bub.scale.x += .1;
+                    bub.scale.y += .1;
+                }
             }
         }
-    }
-
-    function render() {
-
     }
 
     function startGame() {
@@ -88,9 +104,40 @@ window.onload = function() {
             good ? 0 : 1
         );
 
-        unit.body.bounce.set(1);
-        unit.body.collideWorldBounds = true;
-        unit.body.velocity.x = game.rnd.integerInRange(-200, 200);
-        unit.body.velocity.y = game.rnd.integerInRange(-200, 200);
+        unit.body.setCollisionGroup(groups.unitsCollisionGroup);
+        unit.body.collides(groups.bubbleCollisionGroup);
+        unit.body.setZeroDamping();
+        unit.body.velocity.x = game.rnd.integerInRange(300, 400) * (Math.round(game.rnd.frac()) || -1);
+        unit.body.velocity.y = game.rnd.integerInRange(300, 400) * (Math.round(game.rnd.frac()) || -1);
+    }
+
+    function createBubble(pointer, evt) {
+
+        if(!status.isRunning)
+            return;
+
+        var x = evt.layerX,
+            y = evt.layerY;
+
+        var bub = game.add.sprite(x, y, 'bubble');
+        game.physics.p2.enable(bub);
+        bub.scale.x*=.1;
+        bub.scale.y*=.1;
+
+        bub.body.setCollisionGroup(groups.bubbleCollisionGroup);
+
+        status.currentBubble = bub;
+    }
+
+    function popBubble(pointer, evt) {
+        if(status.currentBubble) {
+
+            status.currentBubble.body.collides(groups.unitsCollisionGroup, function(bubble, unit) {
+                if(unit.sprite)
+                    unit.sprite.destroy();
+            });
+
+            delete status.currentBubble;
+        }
     }
 };

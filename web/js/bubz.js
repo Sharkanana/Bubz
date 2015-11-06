@@ -4,7 +4,7 @@
  */
 window.onload = function() {
 
-    var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+    var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update, render: render });
 
     var texts = {},
         buttons = {},
@@ -39,7 +39,7 @@ window.onload = function() {
         sprites.logo.anchor.setTo(0.5, 0.5);
 
         //create score indicator
-        texts.score = game.add.text(5, 5, 'Score: ');
+        texts.score = game.add.text(5, 5);
 
         //create start button
         groups.startBtnGroup = game.add.group();
@@ -54,7 +54,6 @@ window.onload = function() {
 
         //setup collision groups
         groups.unitsCollisionGroup = game.physics.p2.createCollisionGroup();
-        groups.bubbleCollisionGroup = game.physics.p2.createCollisionGroup();
 
         //reset bounds collision group
         game.physics.p2.updateBoundsCollisionGroup();
@@ -86,10 +85,15 @@ window.onload = function() {
         }
     }
 
+    function render() {
+        texts.score.text = 'Score: ' + status.score;
+    }
+
     function startGame() {
         sprites.logo.visible = false;
         groups.startBtnGroup.setAll('visible', false);
 
+        status.score = 0;
         status.isRunning = true;
         status.init = true;
     }
@@ -104,8 +108,9 @@ window.onload = function() {
             good ? 0 : 1
         );
 
+        unit.isGood = good;
+
         unit.body.setCollisionGroup(groups.unitsCollisionGroup);
-        unit.body.collides(groups.bubbleCollisionGroup);
         unit.body.setZeroDamping();
         unit.body.velocity.x = game.rnd.integerInRange(300, 400) * (Math.round(game.rnd.frac()) || -1);
         unit.body.velocity.y = game.rnd.integerInRange(300, 400) * (Math.round(game.rnd.frac()) || -1);
@@ -136,8 +141,14 @@ window.onload = function() {
                 }
             });
 
-            for(var i = 0; i < unitsToDestroy.length; i++)
+            var score = 0;
+            for(var i = 0; i < unitsToDestroy.length; i++) {
+                score += !unitsToDestroy[i].isGood ? 1 : -1;
                 unitsToDestroy[i].destroy();
+            }
+
+            //right now, 10 points for each bad killed over good
+            status.score += score * 10;
 
             bub.destroy();
         }

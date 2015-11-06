@@ -10,6 +10,7 @@ window.onload = function() {
         buttons = {},
         groups = {},
         sprites = {},
+        timers = {},
         status = {
             isRunning: false,
             init: false,
@@ -96,6 +97,8 @@ window.onload = function() {
         status.score = 0;
         status.isRunning = true;
         status.init = true;
+
+        timers.unitTimer = game.time.events.loop(Phaser.Timer.SECOND * 2, createUnit);
     }
 
     function createUnit() {
@@ -110,10 +113,17 @@ window.onload = function() {
 
         unit.isGood = good;
 
+        unit.resolveEvent = game.time.events.add(Phaser.Timer.SECOND * 10, function() { resolveUnit(unit); });
+
         unit.body.setCollisionGroup(groups.unitsCollisionGroup);
         unit.body.setZeroDamping();
         unit.body.velocity.x = game.rnd.integerInRange(300, 400) * (Math.round(game.rnd.frac()) || -1);
         unit.body.velocity.y = game.rnd.integerInRange(300, 400) * (Math.round(game.rnd.frac()) || -1);
+    }
+
+    function resolveUnit(unit) {
+        unit.destroy();
+        status.score += unit.isGood ? 50 : -50;
     }
 
     function createBubble(pointer, evt) {
@@ -143,8 +153,10 @@ window.onload = function() {
 
             var score = 0;
             for(var i = 0; i < unitsToDestroy.length; i++) {
-                score += !unitsToDestroy[i].isGood ? 1 : -1;
-                unitsToDestroy[i].destroy();
+                var unit = unitsToDestroy[i];
+                score += !unit.isGood ? 1 : -1;
+                game.time.events.remove(unit.resolveEvent);
+                unit.destroy();
             }
 
             //right now, 10 points for each bad killed over good

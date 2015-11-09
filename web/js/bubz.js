@@ -71,7 +71,7 @@ window.onload = function() {
             if(status.init) {
 
                 //start with 20 units
-                for(var i = 0; i < 20; i++)
+                for(var i = 0; i < 5; i++)
                     createUnit();
 
                 status.init = false;
@@ -79,8 +79,15 @@ window.onload = function() {
             else {
                 if(status.currentBubble) {
                     var bub = status.currentBubble;
-                    bub.scale.x += .1;
-                    bub.scale.y += .1;
+
+                    if(bub.scale.y > 5) {
+                        popBubble();
+                        console.log(bub.scale.y);
+                    }
+                    else {
+                        bub.scale.x += .1;
+                        bub.scale.y += .1;
+                    }
                 }
             }
         }
@@ -98,32 +105,25 @@ window.onload = function() {
         status.isRunning = true;
         status.init = true;
 
-        timers.unitTimer = game.time.events.loop(Phaser.Timer.SECOND * 2, createUnit);
+        timers.unitTimer = game.time.events.loop(Phaser.Timer.SECOND *.5, createUnit);
     }
 
     function createUnit() {
-        var good = !!Math.round(game.rnd.frac());
+        var level = game.rnd.integerInRange(0, 1);
 
         var unit = groups.units.create(
-            game.rnd.integerInRange(5, 795),
-            game.rnd.integerInRange(5, 595),
+            game.rnd.integerInRange(5, 395),
+            game.rnd.integerInRange(5, 195),
             'unit',
-            good ? 0 : 1
+            level
         );
 
-        unit.isGood = good;
-
-        unit.resolveEvent = game.time.events.add(Phaser.Timer.SECOND * 10, function() { resolveUnit(unit); });
+        unit.level = level;
 
         unit.body.setCollisionGroup(groups.unitsCollisionGroup);
         unit.body.setZeroDamping();
         unit.body.velocity.x = game.rnd.integerInRange(300, 400) * (Math.round(game.rnd.frac()) || -1);
         unit.body.velocity.y = game.rnd.integerInRange(300, 400) * (Math.round(game.rnd.frac()) || -1);
-    }
-
-    function resolveUnit(unit) {
-        unit.destroy();
-        status.score += unit.isGood ? 50 : -50;
     }
 
     function createBubble(pointer, evt) {
@@ -144,25 +144,33 @@ window.onload = function() {
         var bub = status.currentBubble;
         if(bub) {
 
-            var unitsToDestroy = [];
+            var unitsHit = [];
             groups.units.forEach(function(unit) {
                 if(Phaser.Math.distance(unit.x, unit.y, bub.x, bub.y) <= bub.width / 2) {
-                    unitsToDestroy.push(unit);
+                    unitsHit.push(unit);
                 }
             });
 
             var score = 0;
-            for(var i = 0; i < unitsToDestroy.length; i++) {
-                var unit = unitsToDestroy[i];
-                score += !unit.isGood ? 1 : -1;
-                game.time.events.remove(unit.resolveEvent);
-                unit.destroy();
+            for(var i = 0; i < unitsHit.length; i++) {
+                var unit = unitsHit[i];
+
+                //destroy
+                if(unit.level === 0) {
+                    score++;
+                    unit.destroy();
+                }
+                else {
+                    unit.level--;
+                    unit.frame = unit.level;
+                }
             }
 
-            //right now, 10 points for each bad killed over good
+            //right now, 10 points for each unit killed
             status.score += score * 10;
 
             bub.destroy();
+            delete status.currentBubble;
         }
     }
 };

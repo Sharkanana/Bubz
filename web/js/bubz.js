@@ -78,15 +78,8 @@ window.onload = function() {
             }
             else {
                 if(status.currentBubble) {
-                    var bub = status.currentBubble;
-
-                    if(bub.scale.y > 5) {
+                    if(!status.currentBubble.grow())
                         popBubble();
-                    }
-                    else {
-                        bub.scale.x += .1;
-                        bub.scale.y += .1;
-                    }
                 }
             }
         }
@@ -119,35 +112,8 @@ window.onload = function() {
     }
 
     function popBubble(pointer, evt) {
-        var bub = status.currentBubble;
-        if(bub) {
-
-            var unitsHit = [];
-            groups.units.forEach(function(unit) {
-                if(Phaser.Math.distance(unit.x, unit.y, bub.x, bub.y) <= bub.width / 2) {
-                    unitsHit.push(unit);
-                }
-            });
-
-            var score = 0;
-            for(var i = 0; i < unitsHit.length; i++) {
-                var unit = unitsHit[i];
-
-                //destroy
-                if(unit.level === 0) {
-                    score++;
-                    unit.destroy();
-                }
-                else {
-                    unit.level--;
-                    unit.frame = unit.level;
-                }
-            }
-
-            //right now, 10 points for each unit killed
-            status.score += score * 10;
-
-            bub.destroy();
+        if(status.currentBubble) {
+            status.score += status.currentBubble.pop(groups.units);
             delete status.currentBubble;
         }
     }

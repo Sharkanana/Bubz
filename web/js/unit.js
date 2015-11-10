@@ -5,8 +5,8 @@
  */
 function Unit(game) {
 
-    var x = game.rnd.integerInRange(5, 395),
-        y = game.rnd.integerInRange(5, 195),
+    var x = game.rnd.integerInRange(5, 200),
+        y = game.rnd.integerInRange(5, 100),
         level = game.rnd.integerInRange(0, 1);
 
     Phaser.Sprite.call(this, game, x, y, 'unit', level);

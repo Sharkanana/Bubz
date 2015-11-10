@@ -39,6 +39,11 @@ window.onload = function() {
         sprites.logo = game.add.sprite(game.world.centerX, game.world.centerY, 'logo');
         sprites.logo.anchor.setTo(0.5, 0.5);
 
+        //create game over text
+        texts.tooBad = game.add.text(game.world.centerX, game.world.centerY, 'Too Bad', { font: '32px bold arial' });
+        texts.tooBad.anchor.setTo(0.5, 0.5);
+        texts.tooBad.visible = false;
+
         //create score indicator
         texts.score = game.add.text(5, 5);
 
@@ -46,12 +51,6 @@ window.onload = function() {
         groups.startBtnGroup = game.add.group();
         buttons.startBtn = groups.startBtnGroup.add(new Phaser.Button(game, 360, 400, 'btn', startGame, this, 0, 1, 2));
         texts.startBtnLabel = groups.startBtnGroup.add(new Phaser.Text(game, 385, 402, 'Start', { font: '14px bold arial' }));
-
-        //init units
-        var units = game.add.group();
-        units.enableBody = true;
-        units.physicsBodyType = Phaser.Physics.P2JS;
-        groups.units = units;
 
         //setup collision groups
         groups.unitsCollisionGroup = game.physics.p2.createCollisionGroup();
@@ -70,17 +69,22 @@ window.onload = function() {
             //initialize units
             if(status.init) {
 
-                //start with 20 units
+                //start with 5 units
                 for(var i = 0; i < 5; i++)
                     createUnit();
 
                 status.init = false;
             }
             else {
+                //grow bubble
                 if(status.currentBubble) {
                     if(!status.currentBubble.grow())
                         popBubble();
                 }
+
+                //game end condition
+                if(groups.units.length > 50)
+                    endGame();
             }
         }
     }
@@ -90,14 +94,33 @@ window.onload = function() {
     }
 
     function startGame() {
+        //init units
+        var units = game.add.group();
+        units.enableBody = true;
+        units.physicsBodyType = Phaser.Physics.P2JS;
+        groups.units = units;
+
+        game.stage.backgroundColor = '#72ADFF';
+
         sprites.logo.visible = false;
+        texts.tooBad.visible = false;
         groups.startBtnGroup.setAll('visible', false);
 
         status.score = 0;
         status.isRunning = true;
         status.init = true;
 
-        timers.unitTimer = game.time.events.loop(Phaser.Timer.SECOND *.5, createUnit);
+        timers.unitTimer = game.time.events.loop(Phaser.Timer.SECOND * .5, createUnit);
+    }
+
+    function endGame() {
+        status.isRunning = false;
+        game.stage.backgroundColor = '#FF7B59';
+        groups.units.destroy(true);
+        texts.tooBad.visible = true;
+        groups.startBtnGroup.setAll('visible', true);
+
+        game.time.events.remove(timers.unitTimer);
     }
 
     function createUnit() {

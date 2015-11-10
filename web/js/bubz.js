@@ -19,6 +19,8 @@ window.onload = function() {
         };
 
     function preload () {
+        game.scaleRatio = window.devicePixelRatio / 3;
+
         game.load.image('logo', 'img/bubz-logo.png');
         game.load.image('bubble', 'img/bubble.png');
         game.load.spritesheet('btn', 'img/button.png', 80, 20);
@@ -48,8 +50,8 @@ window.onload = function() {
 
         //create start button
         groups.startBtnGroup = game.add.group();
-        buttons.startBtn = groups.startBtnGroup.add(new Phaser.Button(game, 360, 400, 'btn', startGame, this, 0, 1, 2));
-        texts.startBtnLabel = groups.startBtnGroup.add(new Phaser.Text(game, 385, 402, 'Start', { font: '14px bold arial' }));
+        buttons.startBtn = groups.startBtnGroup.add(new Phaser.Button(game, game.world.centerX-40, game.world.centerY+100, 'btn', startGame, this, 0, 1, 2));
+        texts.startBtnLabel = groups.startBtnGroup.add(new Phaser.Text(game, game.world.centerX-15, game.world.centerY+102, 'Start', { font: '14px bold arial' }));
 
         //setup collision groups
         groups.unitsCollisionGroup = game.physics.p2.createCollisionGroup();

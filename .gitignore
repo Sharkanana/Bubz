@@ -1,3 +1,6 @@
 node_modules/**
 .idea/**
 *.iml
+web/Bubz.xdk
+web/Bubz.xdke
+web/intelxdk.config.additions.xml

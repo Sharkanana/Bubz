@@ -82,7 +82,6 @@ window.onload = function() {
 
                     if(bub.scale.y > 5) {
                         popBubble();
-                        console.log(bub.scale.y);
                     }
                     else {
                         bub.scale.x += .1;
@@ -109,35 +108,14 @@ window.onload = function() {
     }
 
     function createUnit() {
-        var level = game.rnd.integerInRange(0, 1);
-
-        var unit = groups.units.create(
-            game.rnd.integerInRange(5, 395),
-            game.rnd.integerInRange(5, 195),
-            'unit',
-            level
-        );
-
-        unit.level = level;
-
-        unit.body.setCollisionGroup(groups.unitsCollisionGroup);
-        unit.body.setZeroDamping();
-        unit.body.velocity.x = game.rnd.integerInRange(300, 400) * (Math.round(game.rnd.frac()) || -1);
-        unit.body.velocity.y = game.rnd.integerInRange(300, 400) * (Math.round(game.rnd.frac()) || -1);
+        groups.units.add(new Unit(game)).init(groups.unitsCollisionGroup);
     }
 
     function createBubble(pointer, evt) {
-
         if(!status.isRunning)
             return;
 
-        var x = evt.layerX,
-            y = evt.layerY;
-
-        var bub = game.add.sprite(x, y, 'bubble');
-        game.physics.p2.enable(bub);
-
-        status.currentBubble = bub;
+        status.currentBubble = new Bubble(game, evt.layerX, evt.layerY);
     }
 
     function popBubble(pointer, evt) {

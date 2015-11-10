@@ -4,7 +4,7 @@
  */
 window.onload = function() {
 
-    var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update, render: render });
+    var game = new Phaser.Game(window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio, Phaser.CANVAS, '', { preload: preload, create: create, update: update, render: render });
 
     var texts = {},
         buttons = {},
@@ -26,7 +26,6 @@ window.onload = function() {
     }
 
     function create () {
-
         //setup physics
         game.physics.startSystem(Phaser.Physics.P2JS);
         game.physics.p2.restitution = 1;

@@ -4,6 +4,7 @@
   "devDependencies": {
     "grunt": "latest",
     "grunt-contrib-uglify": "latest",
-    "grunt-contrib-watch" : "latest"
+    "grunt-contrib-watch" : "latest",
+    "grunt-contrib-compress" : "latest"
   }
 }

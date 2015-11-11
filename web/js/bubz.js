@@ -19,7 +19,7 @@ window.onload = function() {
         };
 
     function preload () {
-        game.scaleRatio = window.devicePixelRatio / 3;
+        game.scale.forceLandscape = true;
 
         game.load.image('logo', 'img/bubz-logo.png');
         game.load.image('bubble', 'img/bubble.png');
@@ -132,7 +132,7 @@ window.onload = function() {
         if(!status.isRunning)
             return;
 
-        status.currentBubble = new Bubble(game, evt.layerX, evt.layerY);
+        status.currentBubble = new Bubble(game, evt.x || pointer.x, evt.y || pointer.y);
     }
 
     function popBubble(pointer, evt) {

@@ -1,9 +1,18 @@
 module.exports = function (grunt) {
     grunt.initConfig({
-        // define source files and their destinations
+        compress: {
+            main: {
+                options: {
+                    archive: 'out/Bubz.zip'
+                },
+                files: [
+                    { expand: true, cwd: 'web/', src: ['**'], dest: '.'}
+                ]
+            }
+        },
         uglify: {
             files: {
-                src: [ 'web/phaser.js', 'web/js/**/*.js', '!web/*.min.js'],  // source files mask
+                src: ['web/phaser.js', 'web/js/**/*.js', '!web/*.min.js'],  // source files mask
                 dest: 'web/app.js'
             }
         },
@@ -15,7 +24,8 @@ module.exports = function (grunt) {
     // load plugins
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-compress');
 
     // register at least this one task
-    grunt.registerTask('default', [ 'uglify' ]);
+    grunt.registerTask('default', [ 'uglify', 'compress' ]);
 };

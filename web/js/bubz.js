@@ -15,7 +15,8 @@ window.onload = function() {
             isRunning: false,
             init: false,
             score: 0,
-            level: 0
+            level: 0,
+            currentBubbles: []
         };
 
     function preload () {
@@ -61,7 +62,6 @@ window.onload = function() {
 
         //input
         game.input.onDown.add(createBubble, this);
-        game.input.onUp.add(popBubble, this);
     }
 
     function update() {
@@ -78,9 +78,18 @@ window.onload = function() {
             }
             else {
                 //grow bubble
-                if(status.currentBubble) {
-                    if(!status.currentBubble.grow())
-                        popBubble();
+                if(status.currentBubbles.length > 0) {
+
+                    var destroyed = -1;
+
+                    for(i = 0; i < status.currentBubbles.length; i++)
+                        if(!status.currentBubbles[i].grow()) {
+                            status.score += status.currentBubbles[i].pop(groups.units);
+                            destroyed = i;
+                        }
+
+                    if(destroyed !== -1)
+                        status.currentBubbles.splice(destroyed, 1);
                 }
 
                 //game end condition
@@ -132,13 +141,8 @@ window.onload = function() {
         if(!status.isRunning)
             return;
 
-        status.currentBubble = new Bubble(game, evt.x || pointer.x, evt.y || pointer.y);
-    }
-
-    function popBubble(pointer, evt) {
-        if(status.currentBubble) {
-            status.score += status.currentBubble.pop(groups.units);
-            delete status.currentBubble;
-        }
+        //three bubz at a time
+        if(status.currentBubbles.length < 3)
+            status.currentBubbles.push(new Bubble(game, evt.x || pointer.x, evt.y || pointer.y));
     }
 };
